@@ -1,69 +1,173 @@
-// A SLICE is a piece of your Redux store
-// This slice handles everything related to authentication
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { authAPI } from '@/lib/api';
 
-import { createSlice } from '@reduxjs/toolkit';
+// Async thunk for register
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.register(userData);
+      // Save token to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', response.data.token);
+      }
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
-// Initial state - what the auth state looks like when app starts
-const initialState = {
-  user: null,           // Current logged-in user
-  token: null,          // JWT token for API requests
-  isLoading: false,     // Is an auth action in progress?
-  error: null,          // Any error messages
-  isAuthenticated: false, // Is user logged in?
+// Async thunk for login
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.login(credentials);
+      // Save token to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', response.data.token);
+      }
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for getting current user
+export const getCurrentUser = createAsyncThunk(
+  'auth/getMe',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.getMe();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for updating profile
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.updateProfile(profileData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Load token from localStorage on app start
+const loadTokenFromStorage = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('token');
+  }
+  return null;
 };
 
-// Create the slice
+const initialState = {
+  user: null,
+  token: loadTokenFromStorage(),
+  isLoading: false,
+  error: null,
+  isAuthenticated: !!loadTokenFromStorage(),
+};
+
 const authSlice = createSlice({
-  name: 'auth', // Name of this slice
+  name: 'auth',
   initialState,
-  
-  // REDUCERS - functions that update state
-  // Each reducer handles one type of action
   reducers: {
-    // Called when login starts
-    loginStart: (state) => {
-      state.isLoading = true;
-      state.error = null;
-    },
-    
-    // Called when login succeeds
-    loginSuccess: (state, action) => {
-      state.isLoading = false;
-      state.isAuthenticated = true;
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      state.error = null;
-    },
-    
-    // Called when login fails
-    loginFailure: (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload;
-    },
-    
-    // Called when user logs out
+    // Manual logout
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
     },
-    
-    // Update user profile
-    updateUser: (state, action) => {
-      state.user = { ...state.user, ...action.payload };
+    // Clear errors
+    clearError: (state) => {
+      state.error = null;
     },
+  },
+  extraReducers: (builder) => {
+    // Register
+    builder
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
+
+    // Login
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
+
+    // Get current user
+    builder
+      .addCase(getCurrentUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+      })
+      .addCase(getCurrentUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.isAuthenticated = false;
+        state.token = null;
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+        }
+      });
+
+    // Update profile
+    builder
+      .addCase(updateUserProfile.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
   },
 });
 
-// Export actions (these are what you'll dispatch from components)
-export const { 
-  loginStart, 
-  loginSuccess, 
-  loginFailure, 
-  logout, 
-  updateUser 
-} = authSlice.actions;
-
-// Export reducer (this goes into the store)
+export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;
