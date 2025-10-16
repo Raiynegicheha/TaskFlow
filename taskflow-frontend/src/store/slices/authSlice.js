@@ -1,15 +1,15 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { authAPI } from '@/lib/api';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { authAPI } from "@/lib/api";
 
 // Async thunk for register
 export const registerUser = createAsyncThunk(
-  'auth/register',
+  "auth/register",
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(userData);
       // Save token to localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', response.data.token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", response.data.token);
       }
       return response.data;
     } catch (error) {
@@ -20,13 +20,13 @@ export const registerUser = createAsyncThunk(
 
 // Async thunk for login
 export const loginUser = createAsyncThunk(
-  'auth/login',
+  "auth/login",
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authAPI.login(credentials);
       // Save token to localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', response.data.token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", response.data.token);
       }
       return response.data;
     } catch (error) {
@@ -37,7 +37,7 @@ export const loginUser = createAsyncThunk(
 
 // Async thunk for getting current user
 export const getCurrentUser = createAsyncThunk(
-  'auth/getMe',
+  "auth/getMe",
   async (_, { rejectWithValue }) => {
     try {
       const response = await authAPI.getMe();
@@ -50,7 +50,7 @@ export const getCurrentUser = createAsyncThunk(
 
 // Async thunk for updating profile
 export const updateUserProfile = createAsyncThunk(
-  'auth/updateProfile',
+  "auth/updateProfile",
   async (profileData, { rejectWithValue }) => {
     try {
       const response = await authAPI.updateProfile(profileData);
@@ -63,8 +63,8 @@ export const updateUserProfile = createAsyncThunk(
 
 // Load token from localStorage on app start
 const loadTokenFromStorage = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token");
   }
   return null;
 };
@@ -78,7 +78,7 @@ const initialState = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     // Manual logout
@@ -87,8 +87,8 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
       }
     },
     // Clear errors
@@ -148,8 +148,8 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.isAuthenticated = false;
         state.token = null;
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
         }
       });
 

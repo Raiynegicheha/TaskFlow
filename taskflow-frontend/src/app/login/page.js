@@ -36,7 +36,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
-    const result = await dispatch(loginStart(formData));
+    const result = await dispatch(loginUser(formData));
     if (loginUser.fulfilled.match(result)) {
       router.push("/dashboard");
       console.log("Login successful");
@@ -111,7 +111,7 @@ const LoginPage = () => {
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600">Don't have an account?</span>
+            <span className="text-gray-600">Don`&apos;`t have an account?</span>
             <Link
               href={"/register"}
               className="font-semibold text-blue-600 hover:underline"
