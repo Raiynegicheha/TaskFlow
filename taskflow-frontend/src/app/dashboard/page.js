@@ -100,18 +100,18 @@ function DashboardContent() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <Avatar className={"h-20 w-20 border-4 border-white"}>
-                <AvatarImage src="" alt="User Avatar" />
+                <AvatarImage src={user?.avatar} alt="User Avatar" />
                 <AvatarFallback className="text-2xl bg-white text-blue-600">
                   U
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h1 className="text-3xl font-bold mb-2">
-                  Welcome Back, {"name"}
+                  Welcome Back, {user?.name}
                 </h1>
-                <p className="text-blue-100 text-lg">{"email"}</p>
+                <p className="text-blue-100 text-lg">{user?.email}</p>
                 <Badge className="mt-2 bg-white text-blue-600 rounded-2xl">
-                  {"role"}
+                  {user?.role}
                 </Badge>
               </div>
             </div>
@@ -182,12 +182,10 @@ function DashboardContent() {
     </div>
   );
 }
-export default DashboardContent;
-
-// export default function DashboardPage() {
-//   return (
-//     <ProtectedRoute>
-//       <DashboardContent />
-//     </ProtectedRoute>
-//   );
-// }
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
+  );
+}

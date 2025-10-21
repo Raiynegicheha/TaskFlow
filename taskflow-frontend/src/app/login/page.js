@@ -41,7 +41,7 @@ const LoginPage = () => {
       router.push("/dashboard");
       console.log("Login successful");
     } else {
-      console.error("Login failed:", result.payload);
+      console.log("Login failed:", result.payload);
     }
     console.log("Form Data:", formData);
   };
@@ -89,16 +89,7 @@ const LoginPage = () => {
                   onChange={handleChange}
                   required
                   className={"h-11 pr-10"}
-                />
-                <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  type="button"
-                  onClick={() => {
-                    console.log("clicked");
-                  }}
-                >
-                  <Eye />
-                </button>
+                />                
               </div>
             </div>
             <Button

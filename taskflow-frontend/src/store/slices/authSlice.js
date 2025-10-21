@@ -41,6 +41,7 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authAPI.getMe();
+      console.log("response from get user", response.data)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -95,6 +96,12 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    // Set user manually (useful for debugging)
+    setUser: (state, action) => {
+      console.log({action})
+      state.user = action.payload;
+      state.isAuthenticated = true;
+    },
   },
   extraReducers: (builder) => {
     // Register
@@ -140,7 +147,7 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
+        state.user = action.payload;
         state.isAuthenticated = true;
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
@@ -160,7 +167,7 @@ const authSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
+        state.user = action.payload.updatedUser;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.isLoading = false;

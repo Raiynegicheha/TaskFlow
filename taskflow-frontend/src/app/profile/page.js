@@ -14,10 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { updateUserProfile } from "@/store/slices/authSlice";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { ArrowLeft, Car, Check, CheckCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const Profile = () => {
@@ -32,6 +33,21 @@ const Profile = () => {
     avatar: user?.avatar || "",
   });
 
+  console.log({formData, user})
+  console.log("user data in profile",user)
+
+  // Update form data when user data changes from Redux
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        bio: user.bio || '',
+        avatar: user.avatar || '',
+      });
+    }
+  }, [user]); // Re-run when user changes
+
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -40,17 +56,32 @@ const Profile = () => {
     setUpdateSuccess(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission logic here
+    const result = await dispatch(updateUserProfile(formData));
+
+    if (updateUserProfile.fulfilled.match(result)) {
+      setUpdateSuccess(true);
+      setTimeout(() => setUpdateSuccess(false), 3000);
+    }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Navigation */}
       <nav className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Button variant="ghost" onClick={() => window.history.back()}>
+            <Button variant="ghost" onClick={() => router.push('/dashboard')}>
               <ArrowLeft className="mr-2 w-4 h-4" />
               Back to Dashboard
             </Button>
@@ -191,10 +222,10 @@ const Profile = () => {
   );
 };
 
-export default function ProfilePage(){
-    return (
-        <ProtectedRoute>
-            <Profile />
-        </ProtectedRoute>
-    )
+export default function ProfilePage() {
+  return (
+    <ProtectedRoute>
+      <Profile />
+    </ProtectedRoute>
+  );
 }

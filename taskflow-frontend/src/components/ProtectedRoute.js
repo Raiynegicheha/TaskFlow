@@ -1,48 +1,61 @@
-"use client";
+'use client';
 
-import { useSelector, useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
-import { use, useEffect } from "react";
-import { getCurrentUser } from "@/store/slices/authSlice";
-import { Loader2 } from "lucide-react";
-import { is } from "zod/v4/locales";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSelector, useDispatch } from 'react-redux';
+import { getCurrentUser } from '@/store/slices/authSlice';
+import { Loader2 } from 'lucide-react';
 
-const ProtectedRoute = ({ children }) => {
+export default function ProtectedRoute({ children }) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { isAuthenticated, isLoading, token } = useSelector(
-    (state) => state.auth
-  );
+  const { user, token, isLoading } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
+  console.log({user, token, isLoading})
 
-  // If not authenticated, redirect to login
   useEffect(() => {
-    //if no token found in local storage, redirect to login
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-    //if token exists but user data not loaded, fetch user data
-    if (token && !isAuthenticated) {
-      dispatch(getCurrentUser());
-    }
-  }, [isAuthenticated, router, dispatch, token]);
+    const initAuth = async () => {
+      // No token = not logged in
+      if (!token) {
+        setLoading(false);
+        router.push('/login');
+        return;
+      }
 
-  // While checking auth status, you can show a loading indicator
-  if (isLoading || (!isAuthenticated && token)) {
+      // Have token but no user = need to fetch user
+      if (token && !user) {
+        try {
+          await dispatch(getCurrentUser()).unwrap();
+        } catch (error) {
+          console.log('Auth error:', error);
+          router.push('/login');
+          return;
+        }
+      }
+
+      setLoading(false);
+    };
+
+    initAuth();
+  }, [token, user, dispatch, router]); // Include dependencies
+
+  // Show loading while fetching user data
+  if (loading || isLoading || (token && !user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 text-lg">Loading...</p>
         </div>
       </div>
     );
   }
 
-  if (isAuthenticated) {
-    return <>children</>;
+  // If we have both token and user, render the protected content
+  if (token && user) {
+    return <>{children}</>;
   }
-  return null;
-};
 
-export default ProtectedRoute;
+  // If no token, redirect to login (this should be handled by the first useEffect)
+  return null;
+}
