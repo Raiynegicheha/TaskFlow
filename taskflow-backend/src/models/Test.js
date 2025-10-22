@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
 // Define a schema - the structure of your data
-const testSchema = new mongoose.Schema({
+const testSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -17,4 +17,4 @@ const testSchema = new mongoose.Schema({
 });
 
 // Create model from schema
-module.exports = mongoose.model('Test', testSchema);
+export default model('Test', testSchema);

@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("../models/User").default;
 const jwt = require("jsonwebtoken");
 
 //HELPER FUNCTION: Generate JWT Token
@@ -165,41 +165,77 @@ exports.getMe = async (req, res) => {
 // @desc   Update user profile
 // @route  PUT /api/auth/me
 // @access Private(requires auth middleware)
+// exports.updateMe = async (req, res) => {
+//   try {
+//     const { name, bio, avatar } = req.body;
+
+//     // Using findByIdAndUpdate for brevity
+//     const updatedUser = await User.findByIdAndUpdate(
+//       req.user.id,
+//       { name, bio, avatar, updatedAt: Date.now() },
+//       { new: true, runValidators: true } // Return the updated document
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       message: "User profile updated successfully",
+//       data: {
+//         updatedUser,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error updating user profile:", error);
+//     res
+//       .status(500)
+//       .json({ success: false, message: "Server Error", error: error.message });
+//   }
+// };
+
+
 exports.updateMe = async (req, res) => {
   try {
     const { name, bio, avatar } = req.body;
-    // req.user is set in the auth middleware after verifying the token
-    // const user = await User.findById(req.user.id);
-    // if (!user) {
-    //     return res.status(404).json({ success: false, message: 'User not found' });
-    // }
 
-    // // Update fields if provided
-    // if (name) user.name = name;
-    // if (bio) user.bio = bio;
-    // if (avatar) user.avatar = avatar;
-    // user.updatedAt = Date.now();
+    // Get current user
+    const currentUser = await User.findById(req.user.id);
 
-    // await user.save();
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
 
-    // Using findByIdAndUpdate for brevity
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { name, bio, avatar, updatedAt: Date.now() },
-      { new: true, runValidators: true } // Return the updated document
-    );
+    // Update fields
+    if (name) currentUser.name = name;
+    if (bio !== undefined) currentUser.bio = bio;
+    if (avatar) currentUser.avatar = avatar;
+    currentUser.updatedAt = Date.now();
 
+    // Save user
+    await currentUser.save();
+
+    // Return consistent structure (same as getMe)
     res.status(200).json({
       success: true,
-      message: "User profile updated successfully",
+      message: 'Profile updated successfully',
       data: {
-        updatedUser,
-      },
+        id: currentUser._id,
+        name: currentUser.name,
+        email: currentUser.email,
+        avatar: currentUser.avatar,
+        role: currentUser.role,
+        bio: currentUser.bio,
+        createdAt: currentUser.createdAt,
+        updatedAt: currentUser.updatedAt
+      }
     });
   } catch (error) {
-    console.error("Error updating user profile:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating profile',
+      error: error.message
+    });
   }
 };
