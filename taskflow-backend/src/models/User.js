@@ -1,10 +1,14 @@
-import { Schema, model } from 'mongoose';
-import { genSalt, hash, compare } from 'bcryptjs';
+// import { Schema, model } from 'mongoose';
+// import { genSalt, hash, compare } from 'bcryptjs';
+
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 
 // User Schema defines the structure of the user  document
 
-const userSchema = new Schema({
+// const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Name is required'],
@@ -60,16 +64,16 @@ userSchema.pre('save', async function (next) {
         return next();
     }
     //Generate salt(random data added to password before hashing)
-    const salt = await genSalt(10);
+    const salt = await bcrypt.genSalt(10);
     //Hash the password with the salt
-    this.password = await hash(this.password, salt);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
 });
 
 // Method to compare entered password with hashed password
 //We'll use this method during login to verify user credentials
 userSchema.methods.matchPassword = async function (enteredPassword) {
-    return await compare(enteredPassword, this.password);
+    return await bcrypt.compare(enteredPassword, this.password);
 };
 
 //Method to return user data without password
@@ -81,4 +85,5 @@ userSchema.methods.toJSON = function () {
 };
 
 // Create and export User model
-export default model('User', userSchema);
+module.exports = mongoose.model('User', userSchema);
+// export default model('User', userSchema);
