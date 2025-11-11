@@ -1,6 +1,7 @@
-import { Schema, model } from "mongoose";
+// import { Schema, model } from "mongoose";
+const mongoose = require('mongoose');
 
-const projectSchema = new Schema(
+const projectSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -33,13 +34,13 @@ const projectSchema = new Schema(
       required: [true, "Due date is required"],
     },
     owner: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     teamMembers: [
       {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
@@ -70,9 +71,18 @@ const projectSchema = new Schema(
 projectSchema.index({owner: 1, status: 1});
 projectSchema.index({ teamMembers: 1});
 
+//virtual for task count(We'll add this later when we create tasks)
+projectSchema.virtual('taskCount', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'project',
+  count: true,
+});
+
 //Ensure virtuals are included in JSON
 projectSchema.set('toJSON', { virtuals: true});
 projectSchema.set('toObject', { virtuals: true});
 
 
-export default model('Project', projectSchema);
+module.exports = mongoose.model('Project', projectSchema);
+// export default model('Project', projectSchema);

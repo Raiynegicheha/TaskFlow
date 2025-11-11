@@ -92,7 +92,7 @@ app.get("/api/db-test", async (req, res) => {
 //API Routes
 app.use("/api/auth", require("./src/routes/authRoutes"));
 // app.use("/api/users", require("./src/routes/userRoutes"));
-// app.use("/api/projects", require("./src/routes/projectRoutes"));
+app.use("/api/projects", require("./src/routes/projectRoutes"));
 // app.use("/api/tasks", require("./src/routes/taskRoutes"));
 
 
@@ -106,7 +106,7 @@ app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res
     .status(500)
-    .json({ success: false, message: "Server Error", error: err.message });
+    .json({ success: false, message: "Server Error", error: process.env.NODE_ENV === 'development' ? err.message : undefined });
 });
 
 
