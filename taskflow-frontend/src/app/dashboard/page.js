@@ -77,7 +77,7 @@ function DashboardContent() {
   ];
 
   // Recent projects
-  const recentProjects = projects
+  const recentProjects = [...projects]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
@@ -184,51 +184,47 @@ function DashboardContent() {
             <CardHeader>
               <CardTitle>Recent Projects</CardTitle>
               <CardDescription>Your Latest Projects</CardDescription>
+              <Link href="/projects">
+                <Button className="mt-4">Create Project</Button>
+              </Link>
             </CardHeader>
             <CardContent>
               {recentProjects.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <FolderKanban className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>No projects yet</p>
-                <p className="text-sm">Create your first project to get started</p>
-                <Link href="/projects">
-                  <Button className="mt-4">
-                    Create Project
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {recentProjects.map((project) => (
-                  <div
-                    key={project._id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => router.push(`/projects/${project._id}`)}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-3 h-12 rounded-full"
-                        style={{ backgroundColor: project.color }}
-                      />
-                      <div>
-                        <h4 className="font-semibold">{project.name}</h4>
-                        <p className="text-sm text-gray-600 line-clamp-1">
-                          {project.description}
-                        </p>
+                <div className="text-center py-12 text-gray-500">
+                  <FolderKanban className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p>No projects yet</p>
+                  <p className="text-sm">
+                    Create your first project to get started
+                  </p>
+                  <Link href="/projects">
+                    <Button className="mt-4">Create Project</Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentProjects.map((project) => (
+                    <div
+                      key={project._id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => router.push(`/projects/${project._id}`)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="w-3 h-12 rounded-full"
+                          style={{ backgroundColor: project.color }}
+                        />
+                        <div>
+                          <h4 className="font-semibold">{project.name}</h4>
+                          <p className="text-sm text-gray-600 line-clamp-1">
+                            {project.description}
+                          </p>
+                        </div>
                       </div>
+                      <Badge variant="secondary">{project.status}</Badge>
                     </div>
-                    <Badge variant="secondary">{project.status}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-              {/* <div className="text-center py-12 text-gray-500 bg-blue-50 rounded-lg">
-                <FolderKanban className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>No projects yet</p>
-                <p className="text-sm">
-                  Create your forst project to get started
-                </p>
-              </div> */}
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 

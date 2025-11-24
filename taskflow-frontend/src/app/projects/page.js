@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 import {
   fetchProjects,
   createProject,
@@ -10,21 +10,21 @@ import {
   deleteProject,
   setFilters,
   clearFilters,
-} from '@/store/slices/projectSlice';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import ProjectCard from '@/components/ProjectCard';
-import ProjectFormDialog from '@/components/ProjectFormDialog';
-import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from "@/store/slices/projectSlice";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import ProjectCard from "@/components/ProjectCard";
+import ProjectFormDialog from "@/components/ProjectFormDialog";
+import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Plus,
   Search,
@@ -36,22 +36,28 @@ import {
   LogOut,
   User,
   X,
-} from 'lucide-react';
-import { logout } from '@/store/slices/authSlice';
+} from "lucide-react";
+import { logout } from "@/store/slices/authSlice";
 
 function ProjectsContent() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { projects, isLoading, filters } = useSelector((state) => state.projects);
+  const { projects, isLoading, filters } = useSelector(
+    (state) => state.projects
+  );
   const { user } = useSelector((state) => state.auth);
 
-  const [viewMode, setViewMode] = useState('grid');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState("grid");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  
+  console.log({ showFilters, filters });
+
   // Dialog states
   const [formDialog, setFormDialog] = useState({ open: false, project: null });
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, project: null });
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    project: null,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch projects on mount
@@ -60,21 +66,25 @@ function ProjectsContent() {
   }, [dispatch]);
 
   // Filter projects based on search and filters
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !filters.status || project.status === filters.status;
-    const matchesPriority = !filters.priority || project.priority === filters.priority;
-    
+    const matchesPriority =
+      !filters.priority || project.priority === filters.priority;
+
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
   // Statistics
   const stats = {
     total: projects.length,
-    active: projects.filter(p => p.status === 'active').length,
-    completed: projects.filter(p => p.status === 'completed').length,
-    overdue: projects.filter(p => new Date(p.dueDate) < new Date() && p.status !== 'completed').length,
+    active: projects.filter((p) => p.status === "active").length,
+    completed: projects.filter((p) => p.status === "completed").length,
+    overdue: projects.filter(
+      (p) => new Date(p.dueDate) < new Date() && p.status !== "completed"
+    ).length,
   };
 
   // Handle create/update project
@@ -83,17 +93,19 @@ function ProjectsContent() {
     try {
       if (formDialog.project) {
         // Update existing project
-        await dispatch(updateProject({
-          id: formDialog.project._id,
-          updates: projectData
-        })).unwrap();
+        await dispatch(
+          updateProject({
+            id: formDialog.project._id,
+            updates: projectData,
+          })
+        ).unwrap();
       } else {
         // Create new project
         await dispatch(createProject(projectData)).unwrap();
       }
       setFormDialog({ open: false, project: null });
     } catch (error) {
-      console.error('Error saving project:', error);
+      console.error("Error saving project:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -106,7 +118,7 @@ function ProjectsContent() {
       await dispatch(deleteProject(deleteDialog.project._id)).unwrap();
       setDeleteDialog({ open: false, project: null });
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error("Error deleting project:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +127,7 @@ function ProjectsContent() {
   // Handle logout
   const handleLogout = () => {
     dispatch(logout());
-    router.push('/login');
+    router.push("/login");
   };
 
   return (
@@ -140,23 +152,19 @@ function ProjectsContent() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push("/dashboard")}
               >
                 Dashboard
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push('/profile')}
+                onClick={() => router.push("/profile")}
               >
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-              >
+              <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </Button>
@@ -190,7 +198,9 @@ function ProjectsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Projects</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.total}
+                  </p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-lg">
                   <FolderKanban className="h-6 w-6 text-blue-600" />
@@ -202,7 +212,9 @@ function ProjectsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Active</p>
-                  <p className="text-2xl font-bold text-blue-600">{stats.active}</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {stats.active}
+                  </p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-lg">
                   <div className="h-6 w-6 flex items-center justify-center">
@@ -216,11 +228,23 @@ function ProjectsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.completed}
+                  </p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-lg">
-                  <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="h-6 w-6 text-green-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
               </div>
@@ -230,11 +254,23 @@ function ProjectsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Overdue</p>
-                  <p className="text-2xl font-bold text-red-600">{stats.overdue}</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {stats.overdue}
+                  </p>
                 </div>
                 <div className="bg-red-100 p-3 rounded-lg">
-                  <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="h-6 w-6 text-red-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
               </div>
@@ -276,36 +312,41 @@ function ProjectsContent() {
             {/* View Mode Toggle */}
             <div className="flex gap-2">
               <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                variant={viewMode === "grid" ? "default" : "outline"}
                 size="icon"
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
               >
                 <LayoutGrid className="h-4 w-4" />
               </Button>
               <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
+                variant={viewMode === "list" ? "default" : "outline"}
                 size="icon"
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
               >
                 <List className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
+        
           {/* Filter Options */}
           {showFilters && (
             <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t">
+              {/* Status Filter */}
               <div className="flex-1 min-w-[200px]">
                 <label className="text-sm font-medium mb-2 block">Status</label>
                 <Select
-                  value={filters.status}
-                  onValueChange={(value) => dispatch(setFilters({ status: value }))}
+                  value={filters.status ? filters.status : "all"}
+                  onValueChange={(value) => {
+                    const newStatus = value === "all" ? "" : value;
+                    dispatch(setFilters({ status: newStatus }));
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All statuses</SelectItem>
+                    <SelectItem value="all">All statuses</SelectItem>
                     <SelectItem value="planning">Planning</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="on-hold">On Hold</SelectItem>
@@ -315,17 +356,23 @@ function ProjectsContent() {
                 </Select>
               </div>
 
+              {/* Priority Filter */}
               <div className="flex-1 min-w-[200px]">
-                <label className="text-sm font-medium mb-2 block">Priority</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Priority
+                </label>
                 <Select
-                  value={filters.priority}
-                  onValueChange={(value) => dispatch(setFilters({ priority: value }))}
+                  value={filters.priority ? filters.priority : "all"}
+                  onValueChange={(value) => {
+                    const newPriority = value === "all" ? "" : value;
+                    dispatch(setFilters({ priority: newPriority }));
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All priorities" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All priorities</SelectItem>
+                    <SelectItem value="all">All priorities</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="high">High</SelectItem>
@@ -334,6 +381,7 @@ function ProjectsContent() {
                 </Select>
               </div>
 
+              {/* Clear Filters Button */}
               {(filters.status || filters.priority) && (
                 <div className="flex items-end">
                   <Button
@@ -358,12 +406,12 @@ function ProjectsContent() {
           <div className="text-center py-20">
             <FolderKanban className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              {projects.length === 0 ? 'No projects yet' : 'No projects found'}
+              {projects.length === 0 ? "No projects yet" : "No projects found"}
             </h3>
             <p className="text-gray-500 mb-6">
               {projects.length === 0
-                ? 'Create your first project to get started'
-                : 'Try adjusting your search or filters'}
+                ? "Create your first project to get started"
+                : "Try adjusting your search or filters"}
             </p>
             {projects.length === 0 && (
               <Button
@@ -378,9 +426,9 @@ function ProjectsContent() {
         ) : (
           <div
             className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-                : 'space-y-4'
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "space-y-4"
             }
           >
             {filteredProjects.map((project) => (
