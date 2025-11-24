@@ -3,6 +3,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
 import testReducer from './slices/testSlice';
+import projectReducer from './slices/projectSlice';
 // Import other reducers here
 
 // We'll import our slices here (we'll create them next)
@@ -13,7 +14,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     test: testReducer,
-    // projects: projectReducer,
+    projects: projectReducer,
     // Each slice manages a piece of state
     // auth: authReducer,
     // projects: projectReducer,
