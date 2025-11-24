@@ -10,8 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { logout } from "@/store/slices/authSlice";
+import { getCurrentUser, logout } from "@/store/slices/authSlice";
 import {
+  ArrowRight,
   Badge,
   CheckSquare,
   FolderKanban,
@@ -20,19 +21,37 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchProjects } from "@/store/slices/projectSlice";
+import Link from "next/link";
 
 function DashboardContent() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const {user} = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
+  const { projects } = useSelector((state) => state.projects);
   console.log("User data in Dashboard:", user);
 
+  useEffect(() => {
+    if (!user) {
+      dispatch(getCurrentUser());
+    }
+    dispatch(fetchProjects());
+  }, [user, dispatch]);
 
   const handleLogout = () => {
     dispatch(logout());
     router.push("/login");
-  }
+  };
+
+  //Calculate stats
+  const activeProjects = projects.filter((p) => p.status === "active").length;
+  const totalTasks = 0;
+  const teamMembersCount = new Set(
+    projects.flatMap((p) => p.teamMembers.map((member) => member._id) || [])
+  ).size;
+
   const stats = [
     {
       title: "Total Projects",
@@ -56,6 +75,19 @@ function DashboardContent() {
       bgColor: "bg-purple-100",
     },
   ];
+
+  // Recent projects
+  const recentProjects = projects
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Navigation Bar */}
@@ -80,11 +112,7 @@ function DashboardContent() {
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-              >
+              <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-2 w-4 h-4" />
                 Logout
               </Button>
@@ -138,6 +166,12 @@ function DashboardContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{stat.value}</div>
+                  {stat.link && (
+                    <p className="text-sm text-blue-600 mt-2 flex items-center">
+                      View All
+                      <ArrowRight className="ml-1 h-3 w-3" />
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -152,13 +186,49 @@ function DashboardContent() {
               <CardDescription>Your Latest Projects</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-gray-500 bg-blue-50 rounded-lg">
+              {recentProjects.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <FolderKanban className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <p>No projects yet</p>
+                <p className="text-sm">Create your first project to get started</p>
+                <Link href="/projects">
+                  <Button className="mt-4">
+                    Create Project
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentProjects.map((project) => (
+                  <div
+                    key={project._id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/projects/${project._id}`)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-3 h-12 rounded-full"
+                        style={{ backgroundColor: project.color }}
+                      />
+                      <div>
+                        <h4 className="font-semibold">{project.name}</h4>
+                        <p className="text-sm text-gray-600 line-clamp-1">
+                          {project.description}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary">{project.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+              {/* <div className="text-center py-12 text-gray-500 bg-blue-50 rounded-lg">
                 <FolderKanban className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                 <p>No projects yet</p>
                 <p className="text-sm">
                   Create your forst project to get started
                 </p>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 

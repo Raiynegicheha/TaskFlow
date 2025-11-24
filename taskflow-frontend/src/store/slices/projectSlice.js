@@ -108,6 +108,7 @@ export const updateProject = createAsyncThunk(
       if (!response.ok) {
         throw new Error(data.message || "Failed to update project");
       }
+      return data.data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -223,7 +224,7 @@ const projectSlice = createSlice({
       .addCase(updateProject.fulfilled, (state, action) => {
         state.isLoading = false;
         const index = state.projects.findIndex(
-          (project) => project.id === action.payload.id
+          (project) => project.id === action.payload._id
         );
         if (index !== -1) {
           state.projects[index] = action.payload;
