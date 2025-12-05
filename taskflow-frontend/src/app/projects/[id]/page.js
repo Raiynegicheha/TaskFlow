@@ -432,7 +432,7 @@ function ProjectDetailsContent({ projectId }) {
                 Task board coming soon!
               </p>
               <p className="text-sm">
-                We'll add the Kanban board here in the next step
+                `We'll add the Kanban board here in the next step`
               </p>
             </div>
           </CardContent>
