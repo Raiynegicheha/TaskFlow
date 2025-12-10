@@ -274,7 +274,25 @@ exports.reorderTasks = async (req, res) => {
       } else {
         updateData.completedAt = null;
       }
+
+      return Task.findByIdAndUpdate(taskUpdate.id, updateData, { new: true });
     });
+
+    await Promise.all(updatePromises);
+
+    //Fetch updated tasks
+    const updatedTasks = await Task.find({ project: projectId })
+      .populate("assignedTo", "name email avatar")
+      .populate("createdBy", "name email avatar")
+      .sort({ order: 1 });
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Tasks reordered successfully",
+        data: updatedTasks,
+      });
   } catch (error) {
     console.error("Reorder tasks error", error);
     res.status(500).json({

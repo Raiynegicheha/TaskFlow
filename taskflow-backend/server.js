@@ -25,6 +25,14 @@ app.get("/", (req, res) => {
     message: "🚀 TaskFlow API is running!",
     status: "success",
     timestamp: new Date().toISOString(),
+    endpoints: {
+      auth: "/api/auth",
+      projects: "/api/projects",
+      tasks: "/api/tasks",
+      health: "/api/health",
+      test: "/api/test",
+      dbTest: "/api/db-test"
+    }
   });
 });
 
@@ -93,7 +101,10 @@ app.get("/api/db-test", async (req, res) => {
 app.use("/api/auth", require("./src/routes/authRoutes"));
 // app.use("/api/users", require("./src/routes/userRoutes"));
 app.use("/api/projects", require("./src/routes/projectRoutes"));
-// app.use("/api/tasks", require("./src/routes/taskRoutes"));
+
+const taskRoutes = require("./src/routes/taskRoutes");
+app.use("/api/projects/:projectId/tasks", taskRoutes); // Nested under projects
+app.use("/api/tasks", taskRoutes);// Individual task routes
 
 
 // 404 handler for unknown routes
