@@ -286,13 +286,11 @@ exports.reorderTasks = async (req, res) => {
       .populate("createdBy", "name email avatar")
       .sort({ order: 1 });
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Tasks reordered successfully",
-        data: updatedTasks,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Tasks reordered successfully",
+      data: updatedTasks,
+    });
   } catch (error) {
     console.error("Reorder tasks error", error);
     res.status(500).json({
